@@ -1,5 +1,7 @@
 import requests
 
+years = [i for i in range(2026, 2019, -1)]
+
 years_id = {   
     2025: "EBEAC76BE72D429B8CB93DBC47CEB5BB",
     2024: "8EB09C3BE33647B8ACC41D11C912C2E4",
@@ -19,7 +21,7 @@ years_limit = {
 # 2 sources: Gazett page & Archive page
 # Collect channel token by manually accessing website
 
-def scrape(token: str, year):
+def scrape_year(token: str, year):
     # From the main Gazett page, request for gazetts
     base_url = "https://www.gov.ky/content/published/api/v1.1/items"
 
@@ -49,6 +51,14 @@ def scrape(token: str, year):
     for item in items:
         slug = item.get('slug')
         slugs.append(slug)
-    print(slugs)
+    return slugs
 
-scrape('3d887eb9d03345709d279836a8be130e', 2021)
+def scrape(token: str):
+    slugs = []
+    for year in years:
+        year_slugs = scrape_year(token, year)
+        for s in year_slugs:
+            slugs.append(s)
+    return slugs
+
+print(scrape('3d887eb9d03345709d279836a8be130e'))
