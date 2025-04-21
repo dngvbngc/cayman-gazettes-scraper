@@ -63,11 +63,11 @@ def scrape_year(token, year=2025):
     }
 
     response = requests.get(base_url, params = params)
-    gazetts = response.json()
+    gazettes = response.json()
 
     # Extract the ids from the json to get pdf
     attachments = []
-    items = gazetts.get('items')
+    items = gazettes.get('items')
     for item in items:
         attachment = item.get('fields').get('attachment')[0].get('id')
         attachments.append(attachment)

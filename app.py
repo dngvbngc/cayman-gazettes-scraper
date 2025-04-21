@@ -13,7 +13,7 @@ def generate_pdf():
     year = request.form.get('year')
     year = int(year) if year else 2025
     pdf_file = scrape(token, year)
-    return send_file(pdf_file, as_attachment = True, download_name = f'gazetts-{year}.pdf', mimetype="application/pdf")
+    return send_file(pdf_file, as_attachment = True, download_name = f'gazettes-{year}.pdf', mimetype="application/pdf")
 
 if __name__ == '__main__':
 	app.run()
