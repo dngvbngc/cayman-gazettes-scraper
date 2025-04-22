@@ -49,9 +49,9 @@ years_limit = {
 
 scraped = {   
     2025: 8,
-    2024: 26,
+    2024: 29,
     2023: 26,
-    2022: 26,
+    2022: 24,
     2021: 26,
     2020: 26,
 }
@@ -146,3 +146,6 @@ def scrape(year):
     output_pdf.seek(0)
 
     return output_pdf
+
+for year in range(2020, 2026):
+    print(len(scrape_year(year)))
