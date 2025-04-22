@@ -7,28 +7,10 @@
   </head>
   <body>
     <h1>Scrape Cayman Gazettes</h1>
-    <p>
-      <b>To retrieve the token: </b><br />
-      1. Visit the official
-      <a href="https://www.gov.ky/gazettes/gazettes">Cayman Gazettes site</a>
-      <br />
-      2. Right click, select 'Inspect' <br />
-      3. Select the 'Network' tab at the top of the page <br />
-      4. Reload the Gazettes site by pressing Command + Shift + R <br />
-      5. On the "Name" left bar, select any Network call beginning with 'items'
-      <br />
-      6. Click on Payload on the right pannel <br />
-      7. Copy channel token <br />
-    </p>
     <form method="POST" action="/generate-pdf">
-      <!-- <label for="token">Token:</label>
+      <label for="year">Year:</label>
       <br />
-      <input width="100px" type="text" id="token" name="token" required />
-      <br /> -->
-
-      <label for="year">Year (Default: 2025):</label>
-      <br />
-      <input type="number" id="year" name="year" />
+      <input type="number" id="year" name="year" required />
       <br />
 
       <input type="submit" value="Scrape" />

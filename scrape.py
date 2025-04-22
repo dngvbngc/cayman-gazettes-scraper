@@ -1,9 +1,13 @@
 import requests
 import re
+import os
 from PyPDF2 import PdfMerger 
 from io import BytesIO
 from playwright.sync_api import sync_playwright
 
+TOKEN = "3d887eb9d03345709d279836a8be130e"
+
+# Only for local use, in case token changes
 def get_token():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)  
@@ -43,8 +47,17 @@ years_limit = {
     2020: {"gt": "20191231", "lt": "20210101"},
 }
 
+scraped = {   
+    2025: 8,
+    2024: 26,
+    2023: 26,
+    2022: 26,
+    2021: 26,
+    2020: 26,
+}
+
 # Unused
-def get_year_ids(token):
+def get_year_ids():
     ids = []
     url = 'https://www.gov.ky/gazettes/pages/48.json'
     response = requests.get(url)
@@ -60,13 +73,11 @@ def get_year_ids(token):
 
     return ids
 
-def scrape_year(token, year=2025):
+def scrape_year(year=2025):
     """
     Scrapes gazette attachments from the Cayman Islands Gazette API for a given year.
-    Channel token must be collected manually by accessing the Gazette website.
 
     Args:
-        token (str): The channel token for API authentication.
         year (int): The year for which to scrape gazettes. Defaults to 2025.
 
     Returns:
@@ -84,7 +95,7 @@ def scrape_year(token, year=2025):
         "fields": "ALL",
         "orderBy": "fields.release_date:desc",
         "totalResults": "true",
-        "channelToken": token,
+        "channelToken": TOKEN,
         "q": query,
     }
 
@@ -104,20 +115,23 @@ def scrape(year):
     Downloads and merges Cayman Islands Gazette PDFs for a given range of years.
 
     Args:
-        token (str): Channel token for authenticating API requests.
-        start_year (int, optional): The starting year for scraping gazettes (inclusive). Defaults to 2020.
-        end_year (int, optional): The ending year for scraping gazettes (inclusive). Defaults to 2025.
+        year (int): The year for which to scrape gazettes. Defaults to 2025.
 
     Returns:
         BytesIO: The merged PDF.
     """
-    token = get_token()
-    attachments = scrape_year(token, year)
-    merger = PdfMerger()
+    attachments = scrape_year(year)
+    file_path = os.path.join('data', f"gazettes-{year}.pdf")
+
+    # If attachments have been scraped, return the scraped file
+    if year in scraped and scraped[year] == len(attachments) and os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            return BytesIO(f.read())
 
     # From the ids, download the PDFs and combine
+    merger = PdfMerger()
     for a in attachments:
-        url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={token}'
+        url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={TOKEN}'
         response = requests.get(url)
         content = response.json()
         pdf_url = content.get('fields').get('native').get('links')[0].get('href')

@@ -9,7 +9,6 @@ def index():
 
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf():
-    # token = request.form.get('token')
     year = request.form.get('year')
     year = int(year) if year else 2025
     pdf_file = scrape(year)
