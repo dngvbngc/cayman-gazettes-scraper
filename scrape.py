@@ -122,14 +122,19 @@ def scrape(year):
     """
     attachments = scrape_year(year)
     file_path = os.path.join('data', f"gazettes-{year}.pdf")
+    l = len(attachments)
 
     # If attachments have been scraped, return the scraped file
-    if year in scraped and scraped[year] == len(attachments) and os.path.exists(file_path):
+    if year in scraped and scraped[year] == l and os.path.exists(file_path):
         with open(file_path, "rb") as f:
             return BytesIO(f.read())
 
     # From the ids, download the PDFs and combine
     merger = PdfMerger()
+    if year in scraped and scraped[year] < l and os.path.exists(file_path):
+        offset = l - scraped[year]
+        attachments = attachments[:offset]
+
     for a in attachments:
         url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={TOKEN}'
         response = requests.get(url)
@@ -139,6 +144,10 @@ def scrape(year):
         if pdf_response.status_code == 200:
             pdf_file = BytesIO(pdf_response.content)
             merger.append(pdf_file)
+    
+    if year in scraped and scraped[year] < l and os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            merger.append(f)
 
     output_pdf = BytesIO()
     merger.write(output_pdf)
@@ -146,6 +155,3 @@ def scrape(year):
     output_pdf.seek(0)
 
     return output_pdf
-
-for year in range(2020, 2026):
-    print(len(scrape_year(year)))
