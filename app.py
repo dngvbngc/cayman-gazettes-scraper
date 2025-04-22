@@ -9,10 +9,10 @@ def index():
 
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf():
-    token = request.form.get('token')
+    # token = request.form.get('token')
     year = request.form.get('year')
     year = int(year) if year else 2025
-    pdf_file = scrape(token, year)
+    pdf_file = scrape(year)
     return send_file(pdf_file, as_attachment = True, download_name = f'gazettes-{year}.pdf', mimetype="application/pdf")
 
 if __name__ == '__main__':

@@ -1,6 +1,32 @@
 import requests
+import re
 from PyPDF2 import PdfMerger 
 from io import BytesIO
+from playwright.sync_api import sync_playwright
+
+def get_token():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)  
+        context = browser.new_context()
+        page = context.new_page()
+        token_found = None
+
+        # Hook to listen to network responses
+        def handle_response(response):
+            url = response.url
+            if 'channelToken=' in url:
+                match = re.search(r'channelToken=([a-f0-9]+)', url)
+                if match:
+                    nonlocal token_found
+                    token_found = match.group(1)
+                    return  
+
+        page.on("response", handle_response)
+        page.goto("https://www.gov.ky/gazettes/gazettes")
+        page.wait_for_timeout(10000)  # Wait 10 seconds for requests 
+
+        browser.close()
+        return token_found
 
 years_id = {   
     2025: "EBEAC76BE72D429B8CB93DBC47CEB5BB",
@@ -73,7 +99,7 @@ def scrape_year(token, year=2025):
         attachments.append(attachment)
     return attachments
 
-def scrape(token, year):
+def scrape(year):
     """
     Downloads and merges Cayman Islands Gazette PDFs for a given range of years.
 
@@ -85,6 +111,7 @@ def scrape(token, year):
     Returns:
         BytesIO: The merged PDF.
     """
+    token = get_token()
     attachments = scrape_year(token, year)
     merger = PdfMerger()
 
