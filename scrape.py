@@ -1,7 +1,7 @@
 import requests
 import re
 import os
-from PyPDF2 import PdfMerger 
+from PyPDF2 import PdfReader, PdfMerger 
 from io import BytesIO
 from playwright.sync_api import sync_playwright
 
@@ -56,7 +56,16 @@ scraped = {
     2020: 26,
 }
 
-# Unused
+first_pages_by_year = {
+    2020: [0, 170, 298, 418, 494, 570, 685, 754, 826, 895, 996, 1078, 1172, 1252, 1330, 1395, 1454, 1517, 1584, 1633, 1699, 1788, 1838, 1879, 1925, 2001],
+    2021: [0, 152, 258, 368, 581, 656, 737, 819, 888, 946, 1030, 1092, 1174, 1227, 1301, 1366, 1470, 1555, 1608, 1659, 1717, 1775, 1822, 1869, 1951, 2004],
+    2022: [0, 108, 219, 370, 450, 564, 632, 746, 810, 908, 973, 1035, 1112, 1185, 1241, 1297, 1358, 1413, 1473, 1516, 1595, 1646, 1700, 1757],
+    2023: [0, 157, 285, 421, 495, 574, 674, 743, 811, 869, 958, 1035, 1106, 1168, 1230, 1296, 1361, 1419, 1488, 1543, 1616, 1661, 1722, 1779, 1830, 1896],
+    2024: [0, 138, 243, 348, 444, 532, 605, 707, 763, 830, 896, 983, 1027, 1093, 1168, 1232, 1318, 1362, 1457, 1512, 1570, 1611, 1925, 1962, 2024, 2088],
+    2025: [0, 51, 115, 168, 221, 294, 344, 429]
+}
+
+# For future use (i.e. 2026)
 def get_year_ids():
     ids = []
     url = 'https://www.gov.ky/gazettes/pages/48.json'
@@ -148,6 +157,88 @@ def scrape(year):
     if year in scraped and scraped[year] < l and os.path.exists(file_path):
         with open(file_path, "rb") as f:
             merger.append(f)
+
+    output_pdf = BytesIO()
+    merger.write(output_pdf)
+    merger.close()
+    output_pdf.seek(0)
+
+    return output_pdf
+
+def get_first_pages(year, latest_year=2025):
+    """
+    Get the start pages of each issue in a merged PDF.
+
+    Args:
+        year (str): The year of the merged PDF.
+
+    Returns:
+        start_pages: Array of start pages.
+    """
+
+    if year < latest_year:
+        return first_pages_by_year.get(year)
+
+    if year == latest_year and len(scrape_year(year)) == len(first_pages_by_year[year]):
+        return first_pages_by_year.get(year)
+
+    year_pdf = scrape(year)  
+    reader = PdfReader(year_pdf)
+
+    first_pages = []
+    for i, page in enumerate(reader.pages):
+        text = page.extract_text()
+        if text and 'CONTENTS' in text:
+            first_pages.append(i)
+    return first_pages
+
+def search(term, start_year, end_year):
+    """
+    Search Cayman Islands Gazette PDFs for a given term.
+    The term should be case-insensitive.
+
+    Args:
+        term (str): The search term.
+
+    Returns:
+        BytesIO: The merged PDF.
+    """
+    merger = PdfMerger() 
+
+    for year in range(start_year, end_year + 1):
+        first_pages = get_first_pages(year)
+        year_pdf = scrape(year)  
+        reader = PdfReader(year_pdf)
+        found_pages = []
+        start_pages = []
+        end_pages = []
+
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text and term.lower() in text.lower():
+                if not found_pages:
+                    found_pages.append(i)
+
+        for page in found_pages:
+            # Find start and end page of an issue
+            end_page = None
+            for c in first_pages:
+                if c <= page:
+                    start_page = c
+                else:
+                    end_page = c
+                    break
+
+            # Append to merger PDF if a new issue contains the term
+            if start_page not in start_pages:
+                start_pages.append(start_page)
+                # Append the range [start_page, end_page) (end exclusive)
+                year_pdf.seek(0)  
+                sub_reader = PdfReader(year_pdf)
+                if end_page:
+                    merger.append(year_pdf, pages = (start_page, end_page))
+                else:
+                    merger.append(year_pdf, pages = (start_page, len(sub_reader.pages)))
 
     output_pdf = BytesIO()
     merger.write(output_pdf)

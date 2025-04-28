@@ -7,6 +7,7 @@
   </head>
   <body>
     <h1>Scrape Cayman Gazettes</h1>
+    <h2>Scrape by year</h2>
     <form method="POST" action="/generate-pdf">
       <label for="year">Year:</label>
       <br />
@@ -14,6 +15,24 @@
       <br />
 
       <input type="submit" value="Scrape" />
+    </form>
+
+    <h2>Search by term</h2>
+    <form method="POST" action="/search-pdf">
+      <label for="term">Term:</label>
+      <br />
+      <input id="term" name="term" required />
+      <br />
+      <label for="start-year">Start year:</label>
+      <br />
+      <input type="number" id="start-year" name="start-year" required />
+      <br />
+      <label for="start-year">End year:</label>
+      <br />
+      <input type="number" id="end-year" name="end-year" required />
+      <br />
+
+      <input type="submit" value="Search" />
     </form>
   </body>
 </html>
