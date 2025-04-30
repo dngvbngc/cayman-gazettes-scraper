@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, Response, send_file
-from scrape import scrape, search
+from scrape import scrape, search, scrape_archive
 
 app = Flask(__name__)
 
@@ -22,6 +22,12 @@ def search_pdf():
 
     pdf_file = search(term, start_year, end_year)
     return send_file(pdf_file, as_attachment = True, download_name = f'gazettes-{term}.pdf', mimetype="application/pdf")
+
+@app.route('/scrape-archive-pdf', methods=['POST'])
+def scrape_archive_pdf():
+    year = int(request.form.get('archive-year'))
+    pdf_file = scrape_archive(year)
+    return send_file(pdf_file, as_attachment = True, download_name = f'gazettes-archive-{year}.pdf', mimetype="application/pdf")
 
 if __name__ == '__main__':
 	app.run()

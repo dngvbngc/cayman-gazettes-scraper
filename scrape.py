@@ -4,6 +4,7 @@ import os
 from PyPDF2 import PdfReader, PdfMerger 
 from io import BytesIO
 from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 
 TOKEN = "3d887eb9d03345709d279836a8be130e"
 
@@ -164,6 +165,41 @@ def scrape(year):
     output_pdf.seek(0)
 
     return output_pdf
+
+# Not in use
+def scrape_archive(year):
+    """
+    Downloads and merges Cayman Islands Gazette archived PDFs for a given year.
+
+    Args:
+        year (int): The year for which to scrape archived gazettes.
+
+    Returns:
+        BytesIO: The merged PDF.
+    """
+    merger = PdfMerger()
+    base_url = "https://archives.gov.ky/sites/gazettes/www.gazettes.gov.ky/portal/"
+    year_url = f"page/portal/gazhome/publications/gazettes/{year}.html"
+    response = requests.get(base_url + year_url)
+    soup = BeautifulSoup(response.text, "html.parser")  
+    attachments = []   
+    for link in soup.select("a[href$='.PDF']"):
+        pdf_link = link['href'][15:]
+        attachments.append(pdf_link)
+
+    for a in set(attachments):
+        pdf_response = requests.get(base_url + a)
+        if pdf_response.status_code == 200:
+            pdf_file = BytesIO(pdf_response.content)
+            merger.append(pdf_file)
+
+    output_pdf = BytesIO()
+    merger.write(output_pdf)
+    merger.close()
+    output_pdf.seek(0)
+
+    return output_pdf
+
 
 def get_first_pages(year, latest_year=2025):
     """
