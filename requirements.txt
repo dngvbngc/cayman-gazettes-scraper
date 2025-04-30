@@ -2,3 +2,4 @@ requests
 PyPDF2
 Flask
 playwright
+bs4
