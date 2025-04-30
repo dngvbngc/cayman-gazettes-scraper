@@ -5,13 +5,27 @@
     <meta charset="UTF-8" />
     <title>Scrape Cayman Gazettes</title>
   </head>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h1 {
+      color: blue;
+    }
+
+    input {
+      size: 100px;
+      padding: 1dvh;
+      margin-top: 1dvh;
+    }
+  </style>
   <body>
-    <h1>Scrape Cayman Gazettes</h1>
+    <h1>Cayman Gazettes</h1>
     <h2>Scrape by year</h2>
     <form method="POST" action="/generate-pdf">
-      <label for="year">Year:</label>
-      <br />
-      <input type="number" id="year" name="year" required />
+      <input placeholder="Year" type="number" id="year" name="year" required />
       <br />
 
       <input type="submit" value="Scrape" />
@@ -19,17 +33,25 @@
 
     <h2>Search by term</h2>
     <form method="POST" action="/search-pdf">
-      <label for="term">Term:</label>
+      <input placeholder="Search term" id="term" name="term" required />
       <br />
-      <input id="term" name="term" required />
+
+      <input
+        placeholder="Start year"
+        type="number"
+        id="start-year"
+        name="start-year"
+        required
+      />
       <br />
-      <label for="start-year">Start year:</label>
-      <br />
-      <input type="number" id="start-year" name="start-year" required />
-      <br />
-      <label for="start-year">End year:</label>
-      <br />
-      <input type="number" id="end-year" name="end-year" required />
+
+      <input
+        placeholder="End year"
+        type="number"
+        id="end-year"
+        name="end-year"
+        required
+      />
       <br />
 
       <input type="submit" value="Search" />
