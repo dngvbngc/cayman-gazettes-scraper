@@ -8,6 +8,47 @@ from bs4 import BeautifulSoup
 
 TOKEN = "3d887eb9d03345709d279836a8be130e"
 
+years_id = {   
+    2025: "EBEAC76BE72D429B8CB93DBC47CEB5BB",
+    2024: "8EB09C3BE33647B8ACC41D11C912C2E4",
+    2023: "28F6B30906024804B491A496BCF56078",
+    2022: "13F51BAC20A048AFB91A15887614E669",
+    2021: "13F51BAC20A048AFB91A15887614E669",
+    2020: "13F51BAC20A048AFB91A15887614E669",
+}
+
+years_limit = {
+    2022: {"gt": "20211231", "lt": "20230101"},
+    2021: {"gt": "20201231", "lt": "20220101"},
+    2020: {"gt": "20191231", "lt": "20210101"},
+}
+
+scraped = {   
+    2025: 9,
+    2024: 29,
+    2023: 26,
+    2022: 24,
+    2021: 26,
+    2020: 26,
+}
+
+first_pages_by_year = {
+    2020: [0, 170, 298, 418, 494, 570, 685, 754, 826, 895, 996, 1078, 1172, 1252, 1330, 1395, 1454, 1517, 1584, 1633, 1699, 1788, 1838, 1879, 1925, 2001],
+    2021: [0, 152, 258, 368, 581, 656, 737, 819, 888, 946, 1030, 1092, 1174, 1227, 1301, 1366, 1470, 1555, 1608, 1659, 1717, 1775, 1822, 1869, 1951, 2004],
+    2022: [0, 108, 219, 370, 450, 564, 632, 746, 810, 908, 973, 1035, 1112, 1185, 1241, 1297, 1358, 1413, 1473, 1516, 1595, 1646, 1700, 1757],
+    2023: [0, 157, 285, 421, 495, 574, 674, 743, 811, 869, 958, 1035, 1106, 1168, 1230, 1296, 1361, 1419, 1488, 1543, 1616, 1661, 1722, 1779, 1830, 1896],
+    2024: [0, 138, 243, 348, 444, 532, 605, 707, 763, 830, 896, 983, 1027, 1093, 1168, 1232, 1318, 1362, 1457, 1512, 1570, 1611, 1925, 1962, 2024, 2088],
+    2025: [0, 51, 115, 168, 221, 294, 344, 429]
+}
+
+def get_scraped_pdf_link(year):
+    base_url = "https://vxgshoevqyuwt2kw.public.blob.vercel-storage.com/"
+    if year <= 2019: # Scraped from archive
+        return base_url + f"gazettes-archive-{year}.pdf"
+    else: # Scraped from main page
+        return base_url + f"gazettes-{year}.pdf"
+
+
 # Only for local use, in case token changes
 def get_token():
     with sync_playwright() as p:
@@ -32,39 +73,6 @@ def get_token():
 
         browser.close()
         return token_found
-
-years_id = {   
-    2025: "EBEAC76BE72D429B8CB93DBC47CEB5BB",
-    2024: "8EB09C3BE33647B8ACC41D11C912C2E4",
-    2023: "28F6B30906024804B491A496BCF56078",
-    2022: "13F51BAC20A048AFB91A15887614E669",
-    2021: "13F51BAC20A048AFB91A15887614E669",
-    2020: "13F51BAC20A048AFB91A15887614E669",
-}
-
-years_limit = {
-    2022: {"gt": "20211231", "lt": "20230101"},
-    2021: {"gt": "20201231", "lt": "20220101"},
-    2020: {"gt": "20191231", "lt": "20210101"},
-}
-
-scraped = {   
-    2025: 8,
-    2024: 29,
-    2023: 26,
-    2022: 24,
-    2021: 26,
-    2020: 26,
-}
-
-first_pages_by_year = {
-    2020: [0, 170, 298, 418, 494, 570, 685, 754, 826, 895, 996, 1078, 1172, 1252, 1330, 1395, 1454, 1517, 1584, 1633, 1699, 1788, 1838, 1879, 1925, 2001],
-    2021: [0, 152, 258, 368, 581, 656, 737, 819, 888, 946, 1030, 1092, 1174, 1227, 1301, 1366, 1470, 1555, 1608, 1659, 1717, 1775, 1822, 1869, 1951, 2004],
-    2022: [0, 108, 219, 370, 450, 564, 632, 746, 810, 908, 973, 1035, 1112, 1185, 1241, 1297, 1358, 1413, 1473, 1516, 1595, 1646, 1700, 1757],
-    2023: [0, 157, 285, 421, 495, 574, 674, 743, 811, 869, 958, 1035, 1106, 1168, 1230, 1296, 1361, 1419, 1488, 1543, 1616, 1661, 1722, 1779, 1830, 1896],
-    2024: [0, 138, 243, 348, 444, 532, 605, 707, 763, 830, 896, 983, 1027, 1093, 1168, 1232, 1318, 1362, 1457, 1512, 1570, 1611, 1925, 1962, 2024, 2088],
-    2025: [0, 51, 115, 168, 221, 294, 344, 429]
-}
 
 # For future use (i.e. 2026)
 def get_year_ids():
@@ -130,41 +138,45 @@ def scrape(year):
     Returns:
         BytesIO: The merged PDF.
     """
-    attachments = scrape_year(year)
-    file_path = os.path.join('data', f"gazettes-{year}.pdf")
-    l = len(attachments)
+    # Previous years have been scraped, so just return
+    if (year <= 2024 and year >= 2004):
+        f = requests.get(get_scraped_pdf_link(year))
+        return BytesIO(f.content)
 
-    # If attachments have been scraped, return the scraped file
-    if year in scraped and scraped[year] == l and os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            return BytesIO(f.read())
-
-    # From the ids, download the PDFs and combine
-    merger = PdfMerger()
-    if year in scraped and scraped[year] < l and os.path.exists(file_path):
+    if year == 2025:
+        attachments = scrape_year(2025)
+        l = len(attachments)
         offset = l - scraped[year]
+        # If all 2025 attachments have been scraped and stored in the cloud, return the scraped file
+        if offset == 0:
+            f = requests.get(get_scraped_pdf_link(year))
+            return BytesIO(f.content)
+
+        merger = PdfMerger()
         attachments = attachments[:offset]
 
-    for a in attachments:
-        url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={TOKEN}'
-        response = requests.get(url)
-        content = response.json()
-        pdf_url = content.get('fields').get('native').get('links')[0].get('href')
-        pdf_response = requests.get(pdf_url)
-        if pdf_response.status_code == 200:
-            pdf_file = BytesIO(pdf_response.content)
-            merger.append(pdf_file)
-    
-    if year in scraped and scraped[year] < l and os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            merger.append(f)
+        # Else, download new files
+        for a in attachments:
+            url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={TOKEN}'
+            response = requests.get(url)
+            content = response.json()
+            pdf_url = content.get('fields').get('native').get('links')[0].get('href')
+            pdf_response = requests.get(pdf_url)
+            if pdf_response.status_code == 200:
+                pdf_file = BytesIO(pdf_response.content)
+                merger.append(pdf_file)
+        
+        # Append to scraped file
+        f = requests.get(get_scraped_pdf_link(year))
+        pdf_file = BytesIO(f.content)
+        merger.append(pdf_file)
 
-    output_pdf = BytesIO()
-    merger.write(output_pdf)
-    merger.close()
-    output_pdf.seek(0)
+        output_pdf = BytesIO()
+        merger.write(output_pdf)
+        merger.close()
+        output_pdf.seek(0)
 
-    return output_pdf
+        return output_pdf
 
 # Not in use
 def scrape_archive(year):
