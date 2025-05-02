@@ -49,6 +49,14 @@ def get_scraped_pdf_link(year):
         return base_url + f"gazettes-{year}.pdf"
 
 
+def get_extraordinary_pdf_link(year):
+    base_url = "https://vxgshoevqyuwt2kw.public.blob.vercel-storage.com/"
+    if year <= 2022 and year >= 2004:
+        return base_url + f"extraordinary-gazettes-archive-{year}.pdf"
+    else:
+        return base_url + f"extraordinary-gazettes-{year}.pdf"
+
+
 # Only for local use, in case token changes
 def get_token():
     with sync_playwright() as p:
@@ -294,3 +302,56 @@ def search(term, start_year, end_year):
     output_pdf.seek(0)
 
     return output_pdf
+
+# Not in use
+def scrape_extraordinary_archive(year):
+    """
+    Downloads and merges Cayman Islands Extraordinary Gazette archived PDFs for a given year.
+
+    Args:
+        year (int): The year for which to scrape archived gazettes.
+
+    Returns:
+        BytesIO: The merged PDF.
+    """
+    merger = PdfMerger()
+    base_url = "https://archives.gov.ky/sites/gazettes/www.gazettes.gov.ky/portal/"
+    year_url = f"page/portal/gazhome/publications/extraordinary-gazettes/{year}.html"
+    response = requests.get(base_url + year_url)
+    soup = BeautifulSoup(response.text, "html.parser")  
+    attachments = []   
+    for link in soup.select("a[href$='.PDF']"):
+        pdf_link = link['href'][15:]
+        attachments.append(pdf_link)
+
+    for a in set(attachments):
+        pdf_response = requests.get(base_url + a)
+        if pdf_response.status_code == 200:
+            pdf_file = BytesIO(pdf_response.content)
+            merger.append(pdf_file)
+
+    output_pdf = BytesIO()
+    merger.write(output_pdf)
+    merger.close()
+    output_pdf.seek(0)
+
+    return output_pdf
+
+
+def scrape_extraordinary(year):
+    """
+    Downloads and merges Cayman Islands Extraordinary Gazette PDFs for a given year.
+
+    Args:
+        year (int): The year for which to scrape extraordinary gazettes.
+
+    Returns:
+        BytesIO: The merged PDF.
+    """
+    # Previous years have been scraped, so just return
+    if (year <= 2022 and year >= 2004):
+        f = requests.get(get_extraordinary_pdf_link(year))
+        return BytesIO(f.content)
+
+    else:
+        pass

@@ -31,6 +31,20 @@
       <input type="submit" value="Scrape" />
     </form>
 
+    <h2>Scrape Extraordinary Gazettes by year</h2>
+    <form method="POST" action="/scrape-extraordinary-pdf">
+      <input
+        placeholder="Year"
+        type="number"
+        id="extraordinary-year"
+        name="extraordinary-year"
+        required
+      />
+      <br />
+
+      <input type="submit" value="Scrape Extraordinary Gazettes" />
+    </form>
+
     <h2>Search by term</h2>
     <form method="POST" action="/search-pdf">
       <input placeholder="Search term" id="term" name="term" required />
