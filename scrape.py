@@ -18,6 +18,7 @@ years_id = {
 }
 
 years_limit = {
+    2023: {"gt": "20221231", "lt": "20240101"},
     2022: {"gt": "20211231", "lt": "20230101"},
     2021: {"gt": "20201231", "lt": "20220101"},
     2020: {"gt": "20191231", "lt": "20210101"},
@@ -39,6 +40,12 @@ first_pages_by_year = {
     2023: [0, 157, 285, 421, 495, 574, 674, 743, 811, 869, 958, 1035, 1106, 1168, 1230, 1296, 1361, 1419, 1488, 1543, 1616, 1661, 1722, 1779, 1830, 1896],
     2024: [0, 138, 243, 348, 444, 532, 605, 707, 763, 830, 896, 983, 1027, 1093, 1168, 1232, 1318, 1362, 1457, 1512, 1570, 1611, 1925, 1962, 2024, 2088],
     2025: [0, 51, 115, 168, 221, 294, 344, 429]
+}
+
+extra_years_id = {   
+    2025: "04818F32F9C943C68DBB1D41846591FC",
+    2024: "109A53AFBFB54FC3B480E5125D030511",
+    2023: "1F76667E14EB465B962C5F143DD2119C"
 }
 
 def get_scraped_pdf_link(year):
@@ -338,6 +345,45 @@ def scrape_extraordinary_archive(year):
     return output_pdf
 
 
+def scrape_extra_year(year=2025):
+    """
+    Scrapes extraordinary gazette attachments from the Cayman Islands Gazette API for a given year.
+
+    Args:
+        year (int): The year for which to scrape extra gazettes. Defaults to 2025.
+
+    Returns:
+        List[str]: A list of attachment IDs corresponding to the gazette PDFs.
+    """
+    base_url = "https://www.gov.ky/content/published/api/v1.1/items"
+
+    query = f"""((type eq "Publication") and (language eq "en-GB" or translatable eq "false") and ((taxonomies.categories.nodes.id eq "{extra_years_id.get(year)}"))"""
+    if year > 2023:
+        query += ")"
+    else:
+        query += f""" and (fields.release_date gt "{years_limit.get(year).get('gt')}" AND fields.release_date lt "{years_limit.get(year).get('lt')}"))"""
+
+    params = {
+        "fields": "ALL",
+        "orderBy": "fields.release_date:desc",
+        "totalResults": "true",
+        "channelToken": TOKEN,
+        "q": query,
+        "limit": 200,
+    }
+
+    response = requests.get(base_url, params = params)
+    gazettes = response.json()
+
+    # Extract the ids from the json to get pdf
+    attachments = []
+    items = gazettes.get('items')
+    for item in items:
+        attachment = item.get('fields').get('attachment')[0].get('id')
+        attachments.append(attachment)
+    return attachments
+
+
 def scrape_extraordinary(year):
     """
     Downloads and merges Cayman Islands Extraordinary Gazette PDFs for a given year.
@@ -349,9 +395,41 @@ def scrape_extraordinary(year):
         BytesIO: The merged PDF.
     """
     # Previous years have been scraped, so just return
-    if (year <= 2022 and year >= 2004):
+    if (year <= 2024 and year >= 2004):
         f = requests.get(get_extraordinary_pdf_link(year))
         return BytesIO(f.content)
 
-    else:
-        pass
+    elif year == 2025:
+        attachments = scrape_extra_year(year)
+        l = len(attachments)
+        offset = 37 # CHANGE HERE WHEN UPDATE
+        # If all 2025 attachments have been scraped and stored in the cloud, return the scraped file
+        if offset == 0:
+            f = requests.get(get_extraordinary_pdf_link(year))
+            return BytesIO(f.content)
+
+        merger = PdfMerger()
+        attachments = attachments[:offset]
+
+        # Else, download new files
+        for a in attachments:
+            url = f'https://www.gov.ky/content/published/api/v1.1/items/{a}?channelToken={TOKEN}'
+            response = requests.get(url)
+            content = response.json()
+            pdf_url = content.get('fields').get('native').get('links')[0].get('href')
+            pdf_response = requests.get(pdf_url)
+            if pdf_response.status_code == 200:
+                pdf_file = BytesIO(pdf_response.content)
+                merger.append(pdf_file)
+        
+        # Append to scraped file
+        f = requests.get(get_scraped_pdf_link(year))
+        pdf_file = BytesIO(f.content)
+        merger.append(pdf_file)
+
+        output_pdf = BytesIO()
+        merger.write(output_pdf)
+        merger.close()
+        output_pdf.seek(0)
+
+        return output_pdf
