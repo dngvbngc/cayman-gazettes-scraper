@@ -269,6 +269,7 @@ def search(term, start_year, end_year):
     merger = PdfMerger() 
 
     for year in range(start_year, end_year + 1):
+        print(f"Searching for {term} in {year}...")
         first_pages = get_first_pages(year)
         year_pdf = scrape(year)  
         reader = PdfReader(year_pdf)
@@ -309,6 +310,32 @@ def search(term, start_year, end_year):
     output_pdf.seek(0)
 
     return output_pdf
+
+def simple_search(term, start_year, end_year):
+    """
+    Search Cayman Islands Gazette PDFs for a given term.
+    The term should be case-insensitive.
+
+    Args:
+        term (str): The search term.
+
+    Returns:
+        years_with_term: The years containing the term.
+    """
+    years_with_term = []
+    term = term.lower()
+    for year in range(start_year, end_year + 1):
+        print(f"Searching for {term} in {year}...")
+        year_pdf = scrape(year)  
+        reader = PdfReader(year_pdf)
+
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text and term in text.lower():
+                years_with_term.append(year)
+                break
+
+    return years_with_term
 
 # Not in use
 def scrape_extraordinary_archive(year):

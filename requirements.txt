@@ -3,3 +3,4 @@ PyPDF2
 Flask
 playwright
 bs4
+Jinja2

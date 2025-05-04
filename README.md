@@ -6,6 +6,10 @@
 
 3. New year after 2025: Add year ID in `years_id` dictionary in `scrape.py`.
 
+## How to improve the site
+
+1. Faster search: Use regex to create a company corpus for each year, search the company corpus.
+
 ## How to run the local application
 
 1. Fork the repository
