@@ -285,7 +285,7 @@ def search(term, start_year, end_year):
     merger = PdfMerger() 
 
     for year in range(start_year, end_year + 1):
-        print(f"Searching for {term} in {year}...")
+        print(f"Searching for {term} in Regular Gazettes in {year}...")
         first_pages = get_first_pages(year)
         year_pdf = scrape(year)  
         reader = PdfReader(year_pdf)
@@ -320,6 +320,16 @@ def search(term, start_year, end_year):
                 else:
                     merger.append(year_pdf, pages = (start_page, len(sub_reader.pages)))
 
+    for year in range(start_year, end_year + 1):
+        print(f"Searching for {term} in Extraordinary Gazettes in {year}...")
+        year_pdf = scrape_extraordinary(year)  
+        reader = PdfReader(year_pdf)
+        # Add just the page containing the company name
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text and term.lower() in text.lower():
+                merger.append(year_pdf, pages = [i])
+
     output_pdf = BytesIO()
     merger.write(output_pdf)
     merger.close()
@@ -341,14 +351,25 @@ def simple_search(term, start_year, end_year):
     years_with_term = []
     term = term.lower()
     for year in range(start_year, end_year + 1):
-        print(f"Searching for {term} in {year}...")
+        print(f"Searching for {term} in Regular Gazettes in {year}...")
         year_pdf = scrape(year)  
         reader = PdfReader(year_pdf)
 
         for i, page in enumerate(reader.pages):
             text = page.extract_text()
             if text and term in text.lower():
-                years_with_term.append(year)
+                years_with_term.append(f'Regular Gazette in {year}')
+                break
+
+    for year in range(start_year, end_year + 1):
+        print(f"Searching for {term} in Extraordinary Gazettes in {year}...")
+        year_pdf = scrape_extraordinary(year)  
+        reader = PdfReader(year_pdf)
+
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text and term in text.lower():
+                years_with_term.append(f'Extraordinary Gazette in {year}')
                 break
 
     return years_with_term

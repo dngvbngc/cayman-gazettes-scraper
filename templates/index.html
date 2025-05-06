@@ -7,100 +7,168 @@
   </head>
   <style>
     body {
-      text-align: center;
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    h2 {
-      color: blue;
+    .grid-container {
+      display: grid;
+      grid-template-areas:
+        "header header header header header header"
+        "left left middle middle right right";
+      gap: 10px;
+      padding: 5px;
+    }
+
+    .grid-container > div {
+      padding: 5px;
+    }
+
+    .item1 {
+      grid-area: header;
+      background-color: yellow;
+      text-align: center;
+    }
+
+    .item1 > h1 {
+      font-size: 40px;
+    }
+
+    .item2 {
+      grid-area: left;
+    }
+
+    .item3 {
+      grid-area: middle;
+    }
+
+    .item4 {
+      grid-area: right;
     }
 
     input {
-      size: 100px;
       padding: 1dvh;
       margin-top: 1dvh;
+      .last {
+        margin-bottom: 1dvh;
+      }
+    }
+
+    button {
+      padding: 1dvh;
+      margin-top: 1dvh;
+      margin-bottom: 1dvh;
     }
   </style>
+
   <body>
-    <h2>Cayman Gazettes</h1>
+    <div class="grid-container">
+      <div class="item1"><h1>Cayman Gazettes</h1></div>
 
-    <h3>Search by term</h2>
-    <form method="POST" action="/search-pdf">
-      <input placeholder="Search term" id="term" name="term" required />
-      <br />
+      <div class="item2">
+        <h3>Search by term</h3>
+        <small>Retrieve only <b>relevant Gazettes</b> with the term</small
+        ><br />
+        <small>Search term is <b>case-insensitive</b></small
+        ><br />
+        <small>Search in maximum <b>2 years interval</b></small>
+        <form method="POST" action="/search-pdf">
+          <input placeholder="Search term" id="term" name="term" required />
+          <br />
 
-      <input
-        placeholder="Start year (&gt;= 2004)"
-        type="number"
-        id="start-year"
-        name="start-year"
-        required
-      />
-      <br />
+          <input
+            placeholder="Start year (&gt;= 2004)"
+            type="number"
+            id="start-year"
+            name="start-year"
+            required
+          />
+          <br />
 
-      <input
-        placeholder="End year (&lt;= 2025)"
-        type="number"
-        id="end-year"
-        name="end-year"
-        required
-      />
-      <br />
+          <input
+            class="last"
+            placeholder="End year (&lt;= 2025)"
+            type="number"
+            id="end-year"
+            name="end-year"
+            required
+          />
+          <br />
 
-      <input type="submit" value="Search" />
-    </form>
+          <button type="submit">Search</button>
+        </form>
+      </div>
 
-    <h3>Simple search by term</h2>
-    <form method="POST" action="/simple-search">
-      <input
-        placeholder="Search term"
-        id="simple-search-term"
-        name="simple-search-term"
-        required
-      />
-      <br />
+      <div class="item3">
+        <h3>Simple search by term</h3>
+        <small>Retrieve <b>years containing Gazettes</b> with the term</small
+        ><br />
+        <small>Search term is <b>case-insensitive</b></small
+        ><br />
+        <small>Search in maximum <b>3 years interval</b></small>
+        <form method="POST" action="/simple-search">
+          <input
+            placeholder="Search term"
+            id="simple-search-term"
+            name="simple-search-term"
+            required
+          />
+          <br />
 
-      <input
-        placeholder="Start year (&gt;= 2004)"
-        type="number"
-        id="simple-start-year"
-        name="simple-start-year"
-        required
-      />
-      <br />
+          <input
+            placeholder="Start year (&gt;= 2004)"
+            type="number"
+            id="simple-start-year"
+            name="simple-start-year"
+            required
+          />
+          <br />
 
-      <input
-        placeholder="End year (&lt;= 2025)"
-        type="number"
-        id="simple-end-year"
-        name="simple-end-year"
-        required
-      />
-      <br />
+          <input
+            class="last"
+            placeholder="End year (&lt;= 2025)"
+            type="number"
+            id="simple-end-year"
+            name="simple-end-year"
+            required
+          />
+          <br />
 
-      <input type="submit" value="Search" />
-    </form>
+          <button type="submit">Search</button>
+        </form>
+      </div>
 
-    <h3>Scrape Regular Gazettes by year</h2>
-    <form method="POST" action="/generate-pdf">
-      <input placeholder="Year (2004-2025)" type="number" id="year" name="year" required />
-      <br />
+      <div class="item4">
+        <h3>Scrape by year</h3>
+        <small>Scrape all <b>Regular Gazettes</b> in a given year</small>
+        <form method="POST" action="/generate-pdf">
+          <input
+            class="last"
+            placeholder="Year (2004 - 2025)"
+            type="number"
+            id="year"
+            name="year"
+            required
+          />
+          <br />
 
-      <input type="submit" value="Scrape" />
-    </form>
+          <button type="submit">Scrape</button>
+        </form>
 
-    <h3>Scrape Extraordinary Gazettes by year</h2>
-    <form method="POST" action="/scrape-extraordinary-pdf">
-      <input
-        placeholder="Year (2004-2025)"
-        type="number"
-        id="extraordinary-year"
-        name="extraordinary-year"
-        required
-      />
-      <br />
+        <small>Scrape all <b>Extraordinary Gazettes</b> in a given year</small>
+        <form method="POST" action="/scrape-extraordinary-pdf">
+          <input
+            class="last"
+            placeholder="Year (2004 - 2025)"
+            type="number"
+            id="extraordinary-year"
+            name="extraordinary-year"
+            required
+          />
+          <br />
 
-      <input type="submit" value="Scrape Extraordinary Gazettes" />
-    </form>
+          <button type="submit">Scrape</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
