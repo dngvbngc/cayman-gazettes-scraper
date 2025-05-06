@@ -65,15 +65,12 @@ extra_years_id = {
 }
 
 def get_scraped_pdf_link(year):
-    base_url = "https://vxgshoevqyuwt2kw.public.blob.vercel-storage.com/"
-    if year <= 2019: # Scraped from archive
-        return base_url + f"gazettes-archive-{year}.pdf"
-    else: # Scraped from main page
-        return base_url + f"gazettes-{year}.pdf"
+    base_url = "https://s9hhymcxann7rhaa.public.blob.vercel-storage.com/"
+    return base_url + f"gazettes-{year}.pdf"
 
 
 def get_extraordinary_pdf_link(year):
-    base_url = "https://vxgshoevqyuwt2kw.public.blob.vercel-storage.com/"
+    base_url = "https://s9hhymcxann7rhaa.public.blob.vercel-storage.com/"
     if year <= 2022 and year >= 2004:
         return base_url + f"extraordinary-gazettes-archive-{year}.pdf"
     else:
