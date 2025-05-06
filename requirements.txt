@@ -4,3 +4,4 @@ Flask
 playwright
 bs4
 Jinja2
+bcrypt

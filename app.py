@@ -1,11 +1,23 @@
 from flask import Flask, render_template, request, Response, send_file
 from scrape import scrape, search, simple_search, scrape_archive, scrape_extraordinary
+import bcrypt
 
 app = Flask(__name__)
 
-@app.route('/')
+PASSWORD_HASH = b'$2b$12$uBSZXV7s2YjmwiY8yfiN5uuIKXZwUiI5f4NkhDANK1EkR5Nt3AH0W'
+SALT = b'$2b$12$uBSZXV7s2YjmwiY8yfiN5u'
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-	return render_template('index.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    if request.method == 'POST':
+        code = request.form.get('code')
+        byte_code = str.encode(code)
+        if bcrypt.hashpw(byte_code, SALT) == PASSWORD_HASH:
+	        return render_template('index.html')
+        else:
+            return '<p>Wrong access code</p>'
 
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf():

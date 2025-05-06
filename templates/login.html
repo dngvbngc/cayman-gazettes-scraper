@@ -1,0 +1,65 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Scrape Cayman Gazettes</title>
+  </head>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .container {
+      padding: 5px;
+      text-align: center;
+    }
+
+    .item1 {
+      background-color: yellow;
+      text-align: center;
+      padding: 5px;
+      h1 {
+        font-size: 40px;
+      }
+    }
+
+    h3 {
+      margin-top: 10dvh;
+    }
+
+    input {
+      padding: 1dvh;
+      margin-top: 0dvh;
+      .last {
+        margin-bottom: 1dvh;
+      }
+    }
+
+    button {
+      padding: 1dvh;
+      margin-top: 1dvh;
+      margin-bottom: 1dvh;
+    }
+  </style>
+
+  <body>
+    <div class="container">
+      <div class="item1"><h1>Cayman Gazettes</h1></div>
+      <div><h3>Enter access code</h3></div>
+      <div>
+        <form method="POST" action="/">
+          <input
+            class="last"
+            placeholder="Access code"
+            id="code"
+            name="code"
+            required
+          />
+          <br />
+          <button type="submit">Enter</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
