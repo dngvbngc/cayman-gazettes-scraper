@@ -11,7 +11,7 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    h1 {
+    h2 {
       color: blue;
     }
 
@@ -22,36 +22,15 @@
     }
   </style>
   <body>
-    <h1>Cayman Gazettes</h1>
-    <h2>Scrape by year</h2>
-    <form method="POST" action="/generate-pdf">
-      <input placeholder="Year" type="number" id="year" name="year" required />
-      <br />
+    <h2>Cayman Gazettes</h1>
 
-      <input type="submit" value="Scrape" />
-    </form>
-
-    <h2>Scrape Extraordinary Gazettes by year</h2>
-    <form method="POST" action="/scrape-extraordinary-pdf">
-      <input
-        placeholder="Year"
-        type="number"
-        id="extraordinary-year"
-        name="extraordinary-year"
-        required
-      />
-      <br />
-
-      <input type="submit" value="Scrape Extraordinary Gazettes" />
-    </form>
-
-    <h2>Search by term</h2>
+    <h3>Search by term</h2>
     <form method="POST" action="/search-pdf">
       <input placeholder="Search term" id="term" name="term" required />
       <br />
 
       <input
-        placeholder="Start year"
+        placeholder="Start year (&gt;= 2004)"
         type="number"
         id="start-year"
         name="start-year"
@@ -60,7 +39,7 @@
       <br />
 
       <input
-        placeholder="End year"
+        placeholder="End year (&lt;= 2025)"
         type="number"
         id="end-year"
         name="end-year"
@@ -71,7 +50,7 @@
       <input type="submit" value="Search" />
     </form>
 
-    <h2>Simple search by term</h2>
+    <h3>Simple search by term</h2>
     <form method="POST" action="/simple-search">
       <input
         placeholder="Search term"
@@ -82,7 +61,7 @@
       <br />
 
       <input
-        placeholder="Start year"
+        placeholder="Start year (&gt;= 2004)"
         type="number"
         id="simple-start-year"
         name="simple-start-year"
@@ -91,7 +70,7 @@
       <br />
 
       <input
-        placeholder="End year"
+        placeholder="End year (&lt;= 2025)"
         type="number"
         id="simple-end-year"
         name="simple-end-year"
@@ -100,6 +79,28 @@
       <br />
 
       <input type="submit" value="Search" />
+    </form>
+
+    <h3>Scrape by year</h2>
+    <form method="POST" action="/generate-pdf">
+      <input placeholder="Year (2004-2025)" type="number" id="year" name="year" required />
+      <br />
+
+      <input type="submit" value="Scrape" />
+    </form>
+
+    <h3>Scrape Extraordinary Gazettes by year</h2>
+    <form method="POST" action="/scrape-extraordinary-pdf">
+      <input
+        placeholder="Year (2004-2025)"
+        type="number"
+        id="extraordinary-year"
+        name="extraordinary-year"
+        required
+      />
+      <br />
+
+      <input type="submit" value="Scrape Extraordinary Gazettes" />
     </form>
   </body>
 </html>
